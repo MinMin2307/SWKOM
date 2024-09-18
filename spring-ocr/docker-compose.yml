@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  rest-server:
+    build: .
+    container_name: spring-ocr
+    ports:
+      - "8081:8081"  # Map port 8081 from the container to localhost
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ocr
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ocr
+    ports:
+      - "5433:5432"  # Expose PostgreSQL on port 5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
