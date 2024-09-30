@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost")
 @RequestMapping("/document")
 public class DocumentController {
 
@@ -30,7 +31,7 @@ public class DocumentController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Document>> searchDocument(@RequestParam String query) {
-        return ResponseEntity.ok(new ArrayList<>());
+        return ResponseEntity.ok(List.of(new Document("Document1"), new Document("Document2"),new Document( "Document3")));
     }
 
     @PostMapping("/ocr")
