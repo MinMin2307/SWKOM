@@ -2,14 +2,13 @@ package com.fht.ocr.spring_ocr;
 
 import com.fht.ocr.spring_ocr.dto.DocumentDTO;
 import com.fht.ocr.spring_ocr.model.Document;
-import com.fht.ocr.spring_ocr.repo.DokumentRepo;
+import com.fht.ocr.spring_ocr.repo.DocumentRepo;
 import com.fht.ocr.spring_ocr.service.DocumentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +32,7 @@ public class DocumentServiceTests {
     private DocumentService documentService;
 
     @MockBean
-    private DokumentRepo dokumentRepo;
+    private DocumentRepo documentRepo;
 
 
 
@@ -41,14 +40,14 @@ public class DocumentServiceTests {
         void testAddDocument() {
             MultipartFile file = new MockMultipartFile("data", "filename.txt", "text/plain", "some xml".getBytes());
             Document dummyDocument = new Document();
-            dummyDocument.setContent("some xml");
+            dummyDocument.setPath("./storage/documents/filename.txt");
 
-            when(dokumentRepo.save(any(Document.class))).thenReturn(dummyDocument);
+            when(documentRepo.save(any(Document.class))).thenReturn(dummyDocument);
 
             DocumentDTO result = documentService.addDocument(file);
 
             assertNotNull(result);
-            assertEquals("some xml", result.getContent());
+            assertEquals("./storage/documents/filename.txt", result.getPath());
         }
     }
 

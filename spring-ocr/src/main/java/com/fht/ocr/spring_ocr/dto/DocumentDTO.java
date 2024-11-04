@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DocumentDTO {
-    private String content;
+    private String path;
     private Long metadataId;
 }

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DokumentRepo extends JpaRepository<Document, Long> {
-    List<Document> findByContentContaining(String content);
+public interface DocumentRepo extends JpaRepository<Document, Long> {
+    List<Document> findByPathContaining(String content);
 }

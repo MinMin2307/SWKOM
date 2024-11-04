@@ -12,8 +12,11 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
     depends_on:
       - db
+      - rabbitmq                   # Ensure RabbitMQ is started before the rest-server
     networks:
       - app-network
 
@@ -39,6 +42,15 @@ services:
       - "5433:5432"                # Expose PostgreSQL on port 5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management   # Correct RabbitMQ version
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"                # Default port for RabbitMQ
+      - "15672:15672"              # Port for RabbitMQ management UI
     networks:
       - app-network
 

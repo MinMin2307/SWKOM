@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost")
+@CrossOrigin(origins = {"http://localhost", "http://localhost:3000"})
 @RequestMapping("/document")
 public class DocumentController {
 
@@ -22,6 +22,7 @@ public class DocumentController {
     @PostMapping("/upload")
     public ResponseEntity<DocumentDTO> uploadDocument(@RequestParam("file") MultipartFile file) {
         DocumentDTO documentDTO = documentService.addDocument(file);
+
         return ResponseEntity.ok(documentDTO);
     }
 
