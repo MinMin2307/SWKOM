@@ -22,9 +22,12 @@ import java.util.stream.Collectors;
 @Service
 public class DocumentService {
 
+    //LOG Einträge für das Senden von Dokumenten
     private static final Logger logger = LoggerFactory.getLogger(DocumentService.class);
+
     @Value("${file.storage.directory}")
     private String fileStorageDirectory;
+
     @Autowired
     private DocumentRepo documentRepo;
 
@@ -34,35 +37,31 @@ public class DocumentService {
     @Autowired
     private MessageSenderService messageSenderService;
 
+    private String sanitizeFileName(String originalFileName) {
+        return originalFileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+    }
+
     @Transactional
     public DocumentDTO addDocument(MultipartFile file) {
         Document document = new Document();
         try {
-            // Define the directory where files should be stored
             Path storagePath = Paths.get(fileStorageDirectory).toAbsolutePath().normalize();
-
-            // Ensure that the directory exists
             Files.createDirectories(storagePath);
 
-            // Generate a unique filename based on the current timestamp
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fileName = System.currentTimeMillis() + "_" + sanitizeFileName(file.getOriginalFilename());
             Path filePath = storagePath.resolve(fileName);
 
-            // Log the file path to confirm
-            logger.debug("Saving file to path: {}", filePath.toString());
+            logger.debug("Saving file to path: {}", filePath);
 
-            // Save the file to this path
             file.transferTo(filePath.toFile());
 
-            // Set the file path in the Document entity
-            document.setPath(filePath.toString());
+            document.setPath(storagePath.relativize(filePath).toString());
 
         } catch (IOException e) {
             logger.error("Error processing file", e);
             throw new RuntimeException("Error processing file", e);
         }
 
-        // Save the document entity with the file path in the database
         document = documentRepo.save(document);
 
         try {

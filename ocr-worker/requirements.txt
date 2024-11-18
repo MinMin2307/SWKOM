@@ -1,0 +1,3 @@
+pika
+pytesseract
+pdf2image

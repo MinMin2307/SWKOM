@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# C extensions
+*.so
+
+# Environment variables and configurations
+.env
+*.env
+
+# Virtual environments
+venv/
+ocr-service-env/
+
+# Installers
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Logs and debugging files
+*.log
+*.bak
+*.swp
+
+# Unit test coverage reports
+.coverage
+htmlcov/
+*.cover
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.coveragerc
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files and directories
+tmp/
+temp/
+*.tmp
+
+# Docker-related files
+*.pid
+*.tar
+*.sock
