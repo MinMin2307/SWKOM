@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+// Use environment variable with default fallback
+const SPRING_URL = process.env.REACT_APP_SPRING_URL || 'http://localhost:8081';
+
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,7 +17,7 @@ function App() {
     const formData = new FormData();
     formData.append('file', selectedFile);
 
-    axios.post('http://localhost:8081/document/upload', formData)
+    axios.post(`${SPRING_URL}/document/upload`, formData)
       .then(response => {
         alert(response.data);
       })
@@ -24,7 +27,7 @@ function App() {
   };
 
   const handleSearch = () => {
-    axios.get('http://localhost:8081/document/search', { params: { query: searchQuery } })
+    axios.get(`${SPRING_URL}/document/search`, { params: { query: searchQuery } })
       .then(response => {
         setSearchResults(response.data);
       })

@@ -14,10 +14,19 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: rabbitmq
+      SPRING_RABBITMQ_PASSWORD: rabbitmq
+      FILE_STORAGE_DIRECTORY: /app/storage/documents
+      MINIO_URL: http://minio:9000
+      MINIO_BUCKET_NAME: ocr-bucket
+      MINIO_ACCESS_KEY: gMbdK6OJRhNnq5PYSxLJ
+      MINIO_SECRET_KEY: ZCB9ceGSxDmk48YwM26ixzrpoF7E9Xx5dXKJhnoo
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     networks:
       - app-network
@@ -29,7 +38,8 @@ services:
     ports:
       - "80:80"
     environment:
-      - CHOKIDAR_USEPOLLING=true
+      CHOKIDAR_USEPOLLING: "true"
+      SPRING_URL: "http://spring-ocr:8081"
     networks:
       - app-network
 
@@ -58,6 +68,9 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
     healthcheck:
       test: ["CMD-SHELL", "rabbitmqctl status"]
       interval: 5s
@@ -72,8 +85,17 @@ services:
     container_name: ocr-worker
     environment:
       RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: rabbitmq
+      RABBITMQ_PASSWORD: rabbitmq
+      MINIO_URL: http://minio:9000
+      MINIO_BUCKET_NAME: ocr-bucket
+      MINIO_ACCESS_KEY: gMbdK6OJRhNnq5PYSxLJ
+      MINIO_SECRET_KEY: ZCB9ceGSxDmk48YwM26ixzrpoF7E9Xx5dXKJhnoo
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     networks:
       - app-network
@@ -92,6 +114,11 @@ services:
       - minio-data:/data 
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   app-network:
