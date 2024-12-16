@@ -21,4 +21,7 @@ public class Document {
 
     @NotBlank(message = "Path cannot be blank")
     private String path;
+
+    @Lob
+    private String extractedText;
 }

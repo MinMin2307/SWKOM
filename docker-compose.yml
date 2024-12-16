@@ -21,12 +21,17 @@ services:
       MINIO_BUCKET_NAME: ocr-bucket
       MINIO_ACCESS_KEY: gMbdK6OJRhNnq5PYSxLJ
       MINIO_SECRET_KEY: ZCB9ceGSxDmk48YwM26ixzrpoF7E9Xx5dXKJhnoo
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: elastic
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     networks:
       - app-network
@@ -92,10 +97,15 @@ services:
       MINIO_BUCKET_NAME: ocr-bucket
       MINIO_ACCESS_KEY: gMbdK6OJRhNnq5PYSxLJ
       MINIO_SECRET_KEY: ZCB9ceGSxDmk48YwM26ixzrpoF7E9Xx5dXKJhnoo
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: elastic
     depends_on:
       rabbitmq:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     networks:
       - app-network
@@ -105,13 +115,13 @@ services:
       context: ./minio
     container_name: minio
     ports:
-      - "9000:9000" 
-      - "9001:9001" 
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ACCESS_KEY: admin
       MINIO_SECRET_KEY: admin123
     volumes:
-      - minio-data:/data 
+      - minio-data:/data
     networks:
       - app-network
     healthcheck:
@@ -119,6 +129,24 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  elasticsearch:
+    image: elasticsearch:8.10.1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+      LASTIC_USERNAME: elastic
+      ELASTIC_PASSWORD: elastic
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-u", "elastic:elastic", "http://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
 
 networks:
   app-network:

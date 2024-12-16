@@ -9,6 +9,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
+  const [expandedIndex, setExpandedIndex] = useState(null);
+
+  const handleToggle = (index) => {
+    setExpandedIndex(index === expandedIndex ? null : index);
+  };
+
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -27,14 +33,28 @@ function App() {
   };
 
   const handleSearch = () => {
-    axios.get(`${SPRING_URL}/document/search`, { params: { query: searchQuery } })
+    if (!searchQuery || searchQuery.trim() === '') {
+      console.warn('Search query is empty');
+      return;
+    }
+
+    axios.get(`${SPRING_URL}/elastic/search`, { params: { keyword: searchQuery.trim() } })
       .then(response => {
-        setSearchResults(response.data);
+        console.log(response.data);
+        if (response.data && response.data.length > 0) {
+          setSearchResults(response.data);
+
+        } else {
+          console.warn('No documents found for the given query.');
+          setSearchResults([]); // Clear results if no matches are found
+        }
       })
       .catch(error => {
-        console.error('Error searching for documents:', error);
+        console.error('Error searching for documents:', error.response?.data || error.message);
+        alert('An error occurred while searching. Please try again.');
       });
   };
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
@@ -44,39 +64,57 @@ function App() {
         <div className="mb-6">
           <label className="block text-gray-700">Upload Document</label>
           <input type="file" onChange={handleFileChange} className="mt-2 mb-4" />
-          <button 
-            onClick={handleUpload} 
+          <button
+            onClick={handleUpload}
             className="px-4 py-2 bg-blue-500 text-white rounded">
-              Upload
+            Upload
           </button>
         </div>
 
         <div className="mb-6">
           <label className="block text-gray-700">Search Document</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)} 
-            className="mt-2 p-2 border rounded w-full" 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="mt-2 p-2 border rounded w-full"
             placeholder="Search by name or keyword"
           />
-          <button 
-            onClick={handleSearch} 
+          <button
+            onClick={handleSearch}
             className="mt-2 px-4 py-2 bg-green-500 text-white rounded">
-              Search
+            Search
           </button>
         </div>
 
         <div>
-          <h2 className="text-lg font-bold">Search Results</h2>
-          {searchResults.length > 0 ? (
-            <ul className="list-disc pl-5">
+          <h2 className="text-lg font-bold mb-3">Search Results</h2>
+          {searchResults && searchResults.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-3">
               {searchResults.map((document, index) => (
-                <li key={index}>{document.content}</li>
+                <li key={index}>
+                  <div
+                    className="bg-gray-100 p-4 rounded-md shadow-md cursor-pointer"
+                    onClick={() => handleToggle(index)}
+                  >
+                    <p className="text-sm text-gray-500">
+                      <span className="font-semibold">ID:</span> {document.id}
+                    </p>
+                    <p className="text-sm text-gray-700 mt-1">
+                      <span className="font-semibold">Path:</span> {document.path}
+                    </p>
+                    <p className="text-sm text-gray-800 mt-2">
+                      <span className="font-semibold">Extracted Text:</span>{" "}
+                      {expandedIndex === index
+                        ? document.extractedText
+                        : `${document.extractedText.substring(0, 20)}...`}
+                    </p>
+                  </div>
+                </li>
               ))}
             </ul>
           ) : (
-            <p>No results found</p>
+            <p className="text-gray-500 italic">No results found. Try a different query.</p>
           )}
         </div>
       </div>
